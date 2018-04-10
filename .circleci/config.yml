@@ -21,7 +21,6 @@ jobs:
           git fetch origin
           git config --global user.name LinuxbrewTestBot
           git config --global user.email testbot@linuxbrew.sh
-          chmod 0644 Formula/*.rb
           mkdir -p /home/linuxbrew/.linuxbrew/Homebrew/Library/Taps/$CIRCLE_PROJECT_USERNAME
           cp -a . /home/linuxbrew/.linuxbrew/Homebrew/Library/Taps/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
       - run:
