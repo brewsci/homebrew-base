@@ -5,6 +5,13 @@ class BoostRstudioServer < Formula
   sha256 "beae2529f759f6b3bf3f4969a19c2e9d6f0c503edcb2de4a61d1428519fcb3b0"
   head "https://github.com/boostorg/boost.git"
 
+  bottle do
+    root_url "https://linuxbrew.bintray.com/bottles-base"
+    cellar :any
+    sha256 "50724843ef527741430d4e0fd9c69eff5e5c62c40b2d7c925564cfd35782ed9c" => :sierra_or_later
+    sha256 "4837fde670e33bb585e19c7ed3c41efbb4b641f7c8aae7f53f96748b1debc71d" => :x86_64_linux
+  end
+
   keg_only :versioned_formula
 
   option "with-icu4c", "Build regexp engine with icu support"
