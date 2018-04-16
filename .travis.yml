@@ -102,6 +102,7 @@ before_install:
   - mkdir -p "$(dirname "$HOMEBREW_TAP_DIR")"
   - ln -s "$PWD" "$HOMEBREW_TAP_DIR"
   # Fix error: Incorrect file permissions (664)
+  - chmod 0644 Formula/*.rb
   - umask 022
   - env | grep TRAVIS | tee /tmp/travis.env
   - ulimit -n 1024
