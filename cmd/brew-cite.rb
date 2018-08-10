@@ -20,7 +20,7 @@ module Homebrew
   end
 
   def cite_url(url)
-    if @args.ruby?
+    if args.ruby?
       bib = doi_url_to_bib url
       if bib
         key = bib[/{([^,]+),/, 1]
@@ -31,17 +31,17 @@ module Homebrew
       return
     end
 
-    default = !@args.bib? && !@args.doi? && !@args.text? && !@args.url?
+    default = !args.bib? && !args.doi? && !args.text? && !args.url?
     doi = url[%r{^https://doi\.org/(.*)}, 1]
-    opoo "No DOI for #{url}" if !doi && (args.bib? || @args.doi? || @args.text? || default)
+    opoo "No DOI for #{url}" if !doi && (args.bib? || args.doi? || args.text? || default)
 
-    puts doi if @args.doi? && doi
-    puts url if @args.url?
-    if @args.text?
+    puts doi if args.doi? && doi
+    puts url if args.url?
+    if args.text?
       text = doi_url_to_text url
       puts text if text
     end
-    if @args.bib? || default
+    if args.bib? || default
       bib = doi_url_to_bib url
       puts bib if bib
     end
@@ -73,7 +73,7 @@ module Homebrew
   end
 
   def cite_many
-    @args = Homebrew::CLI::Parser.parse do
+    Homebrew::CLI::Parser.parse do
       switch "--bib"
       switch "--doi"
       switch "--ruby"
