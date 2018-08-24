@@ -1,12 +1,12 @@
 class RstudioServer < Formula
   desc "Integrated development environment (IDE) for R"
   homepage "https://www.rstudio.com"
-  url "https://github.com/rstudio/rstudio/archive/v1.1.447.tar.gz"
-  sha256 "84fcb3a24325a7232bf7215562b92e826ef026c56b88ceea04cb68135a96681e"
-  # head "https://github.com/rstudio/rstudio.git"
+  url "https://github.com/rstudio/rstudio/archive/v1.1.456.tar.gz"
+  sha256 "1362ad0afdb214d85e4edf86a1d42d0f83d0fa91dc4e5079af6424df9b1573d0"
+  head "https://github.com/rstudio/rstudio.git"
 
   if OS.linux?
-    if ENV["CIRCLECI"]
+    if ENV["CIRCLECI"] || ENV["TRAVIS"]
       depends_on "jdk@8" => :build
     end
     depends_on "patchelf" => :build
@@ -121,14 +121,8 @@ class RstudioServer < Formula
   end
 
   def install
-    if ENV["CIRCLECI"]
-      # Reduce memory usage below 4 GB for Circle CI.
-      ENV["MAKEFLAGS"] = "-j4"
-      if OS.linux?
-        # help Circle CI to find java 8
-        ENV["JAVA_HOME"] = Formula["jdk@8"].prefix
-      end
-    end
+    # Reduce memory usage below 4 GB for Circle CI.
+    ENV["MAKEFLAGS"] = "-j4" if ENV["CIRCLECI"]
 
     unless build.head?
       ENV["RSTUDIO_VERSION_MAJOR"] = version.to_s.split(".")[0]
