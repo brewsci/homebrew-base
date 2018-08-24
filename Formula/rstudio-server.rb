@@ -3,7 +3,6 @@ class RstudioServer < Formula
   homepage "https://www.rstudio.com"
   url "https://github.com/rstudio/rstudio/archive/v1.1.456.tar.gz"
   sha256 "1362ad0afdb214d85e4edf86a1d42d0f83d0fa91dc4e5079af6424df9b1573d0"
-  head "https://github.com/rstudio/rstudio.git"
 
   if OS.linux?
     if ENV["CIRCLECI"] || ENV["TRAVIS"]
