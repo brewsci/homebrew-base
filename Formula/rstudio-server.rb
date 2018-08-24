@@ -120,8 +120,8 @@ class RstudioServer < Formula
   end
 
   def install
-    # Reduce memory usage below 4 GB for Circle CI.
-    ENV["MAKEFLAGS"] = "-j4" if ENV["CIRCLECI"]
+    # Reduce memory usage below 4 GB for CI.
+    ENV["MAKEFLAGS"] = "-j4" if ENV["CIRCLECI"] || ENV["TRAVIS"]
 
     unless build.head?
       ENV["RSTUDIO_VERSION_MAJOR"] = version.to_s.split(".")[0]
