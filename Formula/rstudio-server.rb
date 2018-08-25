@@ -3,6 +3,7 @@ class RstudioServer < Formula
   homepage "https://www.rstudio.com"
   url "https://github.com/rstudio/rstudio/archive/v1.1.456.tar.gz"
   sha256 "1362ad0afdb214d85e4edf86a1d42d0f83d0fa91dc4e5079af6424df9b1573d0"
+  head "https://github.com/rstudio/rstudio.git"
 
   bottle do
     root_url "https://linuxbrew.bintray.com/bottles-base"
@@ -29,17 +30,7 @@ class RstudioServer < Formula
   depends_on "openssl"
   depends_on "r" => :recommended
 
-  if build.head?
-    resource "gin" do
-      url "https://s3.amazonaws.com/rstudio-buildtools/gin-2.1.2.zip"
-      sha256 "b98e704164f54be596779696a3fcd11be5785c9907a99ec535ff6e9525ad5f9a"
-    end
-
-    resource "gwt" do
-      url "https://s3.amazonaws.com/rstudio-buildtools/gwt-2.8.1.zip"
-      sha256 "0b7af89fdadb4ec51cdb400ace94637d6fe9ffa401b168e2c3d372392a00a0a7"
-    end
-  else
+  if build.stable?
     resource "gin" do
       url "https://s3.amazonaws.com/rstudio-buildtools/gin-1.5.zip"
       sha256 "f561f4eb5d5fe1cff95c881e6aed53a86e9f0de8a52863295a8600375f96ab94"
@@ -48,6 +39,16 @@ class RstudioServer < Formula
     resource "gwt" do
       url "https://s3.amazonaws.com/rstudio-buildtools/gwt-2.7.0.zip"
       sha256 "aa65061b73836190410720bea422eb8e787680d7bc0c2b244ae6c9a0d24747b3"
+    end
+  else
+    resource "gin" do
+      url "https://s3.amazonaws.com/rstudio-buildtools/gin-2.1.2.zip"
+      sha256 "b98e704164f54be596779696a3fcd11be5785c9907a99ec535ff6e9525ad5f9a"
+    end
+
+    resource "gwt" do
+      url "https://s3.amazonaws.com/rstudio-buildtools/gwt-2.8.1.zip"
+      sha256 "0b7af89fdadb4ec51cdb400ace94637d6fe9ffa401b168e2c3d372392a00a0a7"
     end
   end
 
@@ -129,7 +130,7 @@ class RstudioServer < Formula
     # Reduce memory usage below 4 GB for CI.
     ENV["MAKEFLAGS"] = "-j4" if ENV["CIRCLECI"] || ENV["TRAVIS"]
 
-    unless build.head?
+    if build.stable?
       ENV["RSTUDIO_VERSION_MAJOR"] = version.to_s.split(".")[0]
       ENV["RSTUDIO_VERSION_MINOR"] = version.to_s.split(".")[1]
       ENV["RSTUDIO_VERSION_PATCH"] = version.to_s.split(".")[2]
@@ -140,20 +141,23 @@ class RstudioServer < Formula
     ENV["CXXFLAGS"] = ""
 
     gwt_lib = buildpath/"src/gwt/lib/"
-    if build.head?
-      (gwt_lib/"gin/2.1.2").install resource("gin")
-      (gwt_lib/"gwt/2.8.1").install resource("gwt")
-    else
+    if build.stable?
       (gwt_lib/"gin/1.5").install resource("gin")
       (gwt_lib/"gwt/2.7.0").install resource("gwt")
+    else
+      (gwt_lib/"gin/2.1.2").install resource("gin")
+      (gwt_lib/"gwt/2.8.1").install resource("gwt")
     end
-    gwt_lib.install resource("junit")
-    (gwt_lib/"selenium/2.37.0").install resource("selenium")
-    (gwt_lib/"selenium/2.37.0").install resource("selenium-server")
-    if OS.linux?
-      (gwt_lib/"selenium/chromedriver/2.7").install resource("chromedriver-linux")
-    elsif OS.mac?
-      (gwt_lib/"selenium/chromedriver/2.7").install resource("chromedriver-mac")
+
+    if build.stable?
+      gwt_lib.install resource("junit")
+      (gwt_lib/"selenium/2.37.0").install resource("selenium")
+      (gwt_lib/"selenium/2.37.0").install resource("selenium-server")
+      if OS.linux?
+        (gwt_lib/"selenium/chromedriver/2.7").install resource("chromedriver-linux")
+      elsif OS.mac?
+        (gwt_lib/"selenium/chromedriver/2.7").install resource("chromedriver-mac")
+      end
     end
 
     common_dir = buildpath/"dependencies/common"
@@ -169,11 +173,13 @@ class RstudioServer < Formula
       (common_dir/"pandoc/1.19.2.1/").install "pandoc-citeproc"
     end
 
-    resource("libclang").stage do
-      (common_dir/"libclang/3.5/").install OS.linux? ? "linux/x86_64/libclang.so" : "mac/x86_64/libclang.dylib"
-    end
+    if build.stable?
+      resource("libclang").stage do
+        (common_dir/"libclang/3.5/").install OS.linux? ? "linux/x86_64/libclang.so" : "mac/x86_64/libclang.dylib"
+      end
 
-    (common_dir/"libclang/builtin-headers").install resource("libclang-builtin-headers")
+      (common_dir/"libclang/builtin-headers").install resource("libclang-builtin-headers")
+    end
 
     mkdir "build" do
       args = ["-DRSTUDIO_TARGET=Server", "-DCMAKE_BUILD_TYPE=Release"]
@@ -210,7 +216,7 @@ class RstudioServer < Formula
         inreplace f, /#{prefix/"rstudio-server/bin/rserver"}/, opt_bin/"rserver"
       end
     end
-    if OS.linux?
+    if OS.linux? && build.stable?
       system "patchelf",
         "--replace-needed", "libncurses.so.5", "libncurses.so.6",
         "--remove-needed", "libtinfo.so.5",
