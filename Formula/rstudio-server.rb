@@ -117,6 +117,10 @@ class RstudioServer < Formula
     sha256 "0b8f54c8d278dd5cd2fb3ec6f43e9ea1bfc9e8d595ff88127073d46550e88a74"
   end
 
+  resource "rsconnect" do
+    url "https://github.com/rstudio/rsconnect.git", :branch => "master"
+  end
+
   def which_linux_distribution
     if File.exist?("/etc/redhat-release") || File.exist?("/etc/centos-release")
       distritbuion = "rpm"
@@ -179,6 +183,11 @@ class RstudioServer < Formula
       end
 
       (common_dir/"libclang/builtin-headers").install resource("libclang-builtin-headers")
+    end
+
+    unless build.stable?
+      (common_dir/"rsconnect").install resource("rsconnect")
+      system "R", "CMD", "build", "--no-build-vignettes", (common_dir/"rsconnect")
     end
 
     mkdir "build" do
