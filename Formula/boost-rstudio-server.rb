@@ -24,8 +24,6 @@ class BoostRstudioServer < Formula
     depends_on "icu4c" => :optional
   end
 
-  needs :cxx11
-
   def install
     # Reduce memory usage below 4 GB for Circle CI.
     ENV["MAKEFLAGS"] = "-j5" if ENV["CIRCLECI"]
