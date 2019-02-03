@@ -22,7 +22,7 @@ module Homebrew
   end
 
   def to_name_url(name_version)
-    name, _, full_version = name_version.rpartition("=")
+    name, full_version = name_version.split("=", 2)
     return name unless full_version
 
     version, revision_rebuild = full_version.split("_", 2)
