@@ -3,6 +3,7 @@ class BoostRstudioServer < Formula
   homepage "https://www.boost.org/"
   url "https://downloads.sourceforge.net/project/boost/boost/1.63.0/boost_1_63_0.tar.bz2"
   sha256 "beae2529f759f6b3bf3f4969a19c2e9d6f0c503edcb2de4a61d1428519fcb3b0"
+  revision 1
   head "https://github.com/boostorg/boost.git"
 
   bottle do
@@ -25,9 +26,6 @@ class BoostRstudioServer < Formula
   end
 
   def install
-    # Reduce memory usage below 4 GB for Circle CI.
-    ENV["MAKEFLAGS"] = "-j5" if ENV["CIRCLECI"]
-
     # Force boost to compile with the desired compiler
     open("user-config.jam", "a") do |file|
       if OS.mac?
