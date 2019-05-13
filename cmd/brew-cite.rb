@@ -1,7 +1,7 @@
 #:  * `cite` [`--bib`] [`--doi`] [`--ruby`] [`--text`] [`--url`] <formula_or_doi>...
 #:    Display citations of formulae and DOI.
 
-require "cli_parser"
+require "cli/parser"
 
 module Homebrew
   module_function
