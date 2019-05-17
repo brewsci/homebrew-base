@@ -1,8 +1,8 @@
 class RstudioServer < Formula
   desc "Integrated development environment (IDE) for R"
   homepage "https://www.rstudio.com"
-  url "https://github.com/rstudio/rstudio/archive/v1.1.456.tar.gz"
-  sha256 "1362ad0afdb214d85e4edf86a1d42d0f83d0fa91dc4e5079af6424df9b1573d0"
+  url "https://github.com/rstudio/rstudio/archive/v1.2.1335.tar.gz"
+  sha256 "f124fbae68762d0a1fc9a7dc72ad290aebde768e262df87acda3883a07fdfd58"
 
   bottle do
     root_url "https://linuxbrew.bintray.com/bottles-base"
@@ -22,33 +22,26 @@ class RstudioServer < Formula
   end
 
   depends_on "ant" => :build
-  depends_on "boost-rstudio-server" => :build
+  if OS.linux?
+    depends_on "boost-rstudio-server"
+  elsif OS.mac?
+    depends_on "boost-rstudio-server" => :build
+  end
   depends_on "cmake" => :build
   depends_on "gcc" => :build
   depends_on :java => ["1.8", :build]
+  depends_on :macos if ENV["CIRCLECI"]
   depends_on "openssl"
   depends_on "r" => :recommended
 
-  if build.head?
-    resource "gin" do
-      url "https://s3.amazonaws.com/rstudio-buildtools/gin-2.1.2.zip"
-      sha256 "b98e704164f54be596779696a3fcd11be5785c9907a99ec535ff6e9525ad5f9a"
-    end
+  resource "gin" do
+    url "https://s3.amazonaws.com/rstudio-buildtools/gin-2.1.2.zip"
+    sha256 "b98e704164f54be596779696a3fcd11be5785c9907a99ec535ff6e9525ad5f9a"
+  end
 
-    resource "gwt" do
-      url "https://s3.amazonaws.com/rstudio-buildtools/gwt-2.8.1.zip"
-      sha256 "0b7af89fdadb4ec51cdb400ace94637d6fe9ffa401b168e2c3d372392a00a0a7"
-    end
-  else
-    resource "gin" do
-      url "https://s3.amazonaws.com/rstudio-buildtools/gin-1.5.zip"
-      sha256 "f561f4eb5d5fe1cff95c881e6aed53a86e9f0de8a52863295a8600375f96ab94"
-    end
-
-    resource "gwt" do
-      url "https://s3.amazonaws.com/rstudio-buildtools/gwt-2.7.0.zip"
-      sha256 "aa65061b73836190410720bea422eb8e787680d7bc0c2b244ae6c9a0d24747b3"
-    end
+  resource "gwt" do
+    url "https://s3.amazonaws.com/rstudio-buildtools/gwt-2.8.1.zip"
+    sha256 "0b7af89fdadb4ec51cdb400ace94637d6fe9ffa401b168e2c3d372392a00a0a7"
   end
 
   resource "junit" do
@@ -56,28 +49,8 @@ class RstudioServer < Formula
     sha256 "dc566c3f5da446defe36c534f7ee19cdfe7e565020038b2ef38f01bc9c070551"
   end
 
-  resource "selenium" do
-    url "https://s3.amazonaws.com/rstudio-buildtools/selenium-java-2.37.0.zip"
-    sha256 "0eebba65d8edb01c1f46e462907c58f5d6e1cb0ddf63660a9985c8432bdffbb7"
-  end
-
-  resource "selenium-server" do
-    url "https://s3.amazonaws.com/rstudio-buildtools/selenium-server-standalone-2.37.0.jar"
-    sha256 "97bc8c699037fb6e99ba7af570fb60dbb1b7ce30cde2448287a44ef65b13023e"
-  end
-
-  resource "chromedriver-mac" do
-    url "https://s3.amazonaws.com/rstudio-buildtools/chromedriver-mac"
-    sha256 "5bf42fd9bcc45d45b54a0f59d5839feb454f39fd14170b8fab7f59bf59b1af64"
-  end
-
-  resource "chromedriver-linux" do
-    url "https://s3.amazonaws.com/rstudio-buildtools/chromedriver-linux"
-    sha256 "1ff3e9fc17e456571c440ab160f25ee451b2a4d36e61c8e297737cff7433f48c"
-  end
-
   resource "dictionaries" do
-    url "https://s3.amazonaws.com/rstudio-dictionaries/core-dictionaries.zip"
+    url "https://s3.amazonaws.com/rstudio-buildtools/dictionaries/core-dictionaries.zip"
     sha256 "4341a9630efb9dcf7f215c324136407f3b3d6003e1c96f2e5e1f9f14d5787494"
   end
 
@@ -88,32 +61,14 @@ class RstudioServer < Formula
 
   if OS.linux?
     resource "pandoc" do
-      url "https://s3.amazonaws.com/rstudio-buildtools/pandoc/1.19.2.1/linux-64/pandoc.gz"
-      sha256 "25dab022a12ec67575f4d2f8383c1130c42342ab064ef5e1954790b17e8f7b57"
-    end
-    resource "pandoc-citeproc" do
-      url "https://s3.amazonaws.com/rstudio-buildtools/pandoc/1.19.2.1/linux-64/pandoc-citeproc.gz"
-      sha256 "1243ffd30f490ad0d793259acbbd5d0a95996d3051df7ead1b8f006fcbca0944"
+      url "https://s3.amazonaws.com/rstudio-buildtools/pandoc/2.3.1/pandoc-2.3.1-linux.tar.gz"
+      sha256 "859609cdba5af61aefd7c93d174e412d6a38f5c1be90dfc357158638ff5e7059"
     end
   elsif OS.mac?
     resource "pandoc" do
-      url "https://s3.amazonaws.com/rstudio-buildtools/pandoc/1.19.2.1/macos/pandoc-1.19.2.1.zip"
-      sha256 "9d6e085d1f904b23bc64de251968b63422e7c691c61b0b6963c997c23af54447"
+      url "https://s3.amazonaws.com/rstudio-buildtools/pandoc/2.3.1/pandoc-2.3.1-macOS.zip"
+      sha256 "bc9ba6f1f4f447deff811554603edcdb13344b07b969151569b6e46e1c8c81b7"
     end
-    resource "pandoc-citeproc" do
-      url "https://s3.amazonaws.com/rstudio-buildtools/pandoc/1.19.2.1/macos/pandoc-citeproc-0.10.4.zip"
-      sha256 "11db1554ffd64c692a4f92e7bfa26dbe685300055ab463130e6fd4188f1958ae"
-    end
-  end
-
-  resource "libclang" do
-    url "https://s3.amazonaws.com/rstudio-buildtools/libclang-3.5.zip"
-    sha256 "ecb06fb65ddf0eb7c04be28edd11cc38717102afbe4dbfd6e237ea58d1da85ea"
-  end
-
-  resource "libclang-builtin-headers" do
-    url "https://s3.amazonaws.com/rstudio-buildtools/libclang-builtin-headers.zip"
-    sha256 "0b8f54c8d278dd5cd2fb3ec6f43e9ea1bfc9e8d595ff88127073d46550e88a74"
   end
 
   def which_linux_distribution
@@ -125,9 +80,15 @@ class RstudioServer < Formula
     distritbuion
   end
 
+  # fix build failure with latest macOS compiler
+  patch do
+    url "https://github.com/rstudio/rstudio/commit/b3b1ef10ca8473b6cf02b22cdb57f871f0237a02.diff?full_index=1"
+    sha256 "37c58b7f31307db369ba8c5269f5c303838e06d5db44429766b0213ea6eb6c34"
+  end
+
   def install
     # Reduce memory usage below 4 GB for CI.
-    ENV["MAKEFLAGS"] = "-j4" if ENV["CIRCLECI"] || ENV["TRAVIS"]
+    ENV["MAKEFLAGS"] = "-j2" if ENV["CIRCLECI"] || ENV["TRAVIS"]
 
     unless build.head?
       ENV["RSTUDIO_VERSION_MAJOR"] = version.to_s.split(".")[0]
@@ -140,21 +101,9 @@ class RstudioServer < Formula
     ENV["CXXFLAGS"] = ""
 
     gwt_lib = buildpath/"src/gwt/lib/"
-    if build.head?
-      (gwt_lib/"gin/2.1.2").install resource("gin")
-      (gwt_lib/"gwt/2.8.1").install resource("gwt")
-    else
-      (gwt_lib/"gin/1.5").install resource("gin")
-      (gwt_lib/"gwt/2.7.0").install resource("gwt")
-    end
+    (gwt_lib/"gin/2.1.2").install resource("gin")
+    (gwt_lib/"gwt/2.8.1").install resource("gwt")
     gwt_lib.install resource("junit")
-    (gwt_lib/"selenium/2.37.0").install resource("selenium")
-    (gwt_lib/"selenium/2.37.0").install resource("selenium-server")
-    if OS.linux?
-      (gwt_lib/"selenium/chromedriver/2.7").install resource("chromedriver-linux")
-    elsif OS.mac?
-      (gwt_lib/"selenium/chromedriver/2.7").install resource("chromedriver-mac")
-    end
 
     common_dir = buildpath/"dependencies/common"
 
@@ -162,26 +111,14 @@ class RstudioServer < Formula
     (common_dir/"mathjax-26").install resource("mathjax")
 
     resource("pandoc").stage do
-      (common_dir/"pandoc/1.19.2.1/").install "pandoc"
+      (common_dir/"pandoc/2.3.1/").install "bin/pandoc"
+      (common_dir/"pandoc/2.3.1/").install "bin/pandoc-citeproc"
     end
-
-    resource("pandoc-citeproc").stage do
-      (common_dir/"pandoc/1.19.2.1/").install "pandoc-citeproc"
-    end
-
-    resource("libclang").stage do
-      (common_dir/"libclang/3.5/").install OS.linux? ? "linux/x86_64/libclang.so" : "mac/x86_64/libclang.dylib"
-    end
-
-    (common_dir/"libclang/builtin-headers").install resource("libclang-builtin-headers")
 
     mkdir "build" do
       args = ["-DRSTUDIO_TARGET=Server", "-DCMAKE_BUILD_TYPE=Release"]
-      args << "-DRSTUDIO_USE_LIBCXX=Yes"
       args << "-DRSTUDIO_USE_SYSTEM_BOOST=Yes"
-      args << "-DRSTUDIO_BOOST_VERSION='1.63.0'"
       args << "-DBoost_NO_SYSTEM_PATHS=On"
-      args << "-DBoost_USE_STATIC_LIBS=On"
       args << "-DBOOST_ROOT=#{Formula["boost-rstudio-server"].opt_prefix}"
       args << "-DCMAKE_INSTALL_PREFIX=#{prefix}/rstudio-server"
       args << "-DCMAKE_CXX_FLAGS=-I#{Formula["openssl"].opt_include}"
@@ -209,12 +146,6 @@ class RstudioServer < Formula
       if File.file?(f) && !File.readlines(f).grep(/#{prefix/"rstudio-server/bin/rserver"}/).empty?
         inreplace f, /#{prefix/"rstudio-server/bin/rserver"}/, opt_bin/"rserver"
       end
-    end
-    if OS.linux?
-      system "patchelf",
-        "--replace-needed", "libncurses.so.5", "libncurses.so.6",
-        "--remove-needed", "libtinfo.so.5",
-        prefix/"rstudio-server/bin/rsclang/libclang.so"
     end
   end
 
