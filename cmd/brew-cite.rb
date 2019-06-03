@@ -51,13 +51,18 @@ module Homebrew
     cite_url "https://doi.org/#{doi}"
   end
 
-  def cite_formula(name)
+  def cite_formula(name, follow = true)
     formula = Formula[name]
     matches = formula.path.read.scan /# cite .*"(.*)"/
     if matches.empty?
       opoo "#{formula.full_name}: No citation"
     else
       matches.each { |match| cite_url match[0] }
+    end
+    if args.recursive? and follow
+      formula.deps.each do |dep|
+        cite_formula dep.name, false
+      end
     end
   end
 
@@ -76,6 +81,7 @@ module Homebrew
     Homebrew::CLI::Parser.parse do
       switch "--bib"
       switch "--doi"
+      switch "--recursive"
       switch "--ruby"
       switch "--text"
       switch "--url"
