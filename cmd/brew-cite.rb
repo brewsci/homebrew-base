@@ -1,4 +1,4 @@
-#:  * `cite` [`--bib`] [`--doi`] [`--ruby`] [`--text`] [`--url`] <formula_or_doi>...
+#:  * `cite` [`--bib`] [`--doi`] [`--ruby`] [`--text`] [`--url`] [`--recursive`] <formula_or_doi>...
 #:    Display citations of formulae and DOI.
 
 require "cli/parser"
@@ -54,16 +54,28 @@ module Homebrew
   def cite_formula(name, follow = true)
     formula = Formula[name]
     matches = formula.path.read.scan /# cite .*"(.*)"/
+    missing = []
+
     if matches.empty?
-      opoo "#{formula.full_name}: No citation"
+      missing << formula.full_name
     else
       matches.each { |match| cite_url match[0] }
     end
+
     if args.recursive? and follow
       formula.deps.each do |dep|
-        cite_formula dep.name, false
+        missing += cite_formula(dep.name, false)
       end
     end
+
+    if (args.recursive? and follow) or not args.recursive?
+      opoo "Missing citations for the following formulae:"
+      missing.each do |name|
+        puts "  #{name}"
+      end
+    end
+
+    missing
   end
 
   def cite(argument)
