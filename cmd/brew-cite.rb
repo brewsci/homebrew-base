@@ -68,7 +68,7 @@ module Homebrew
       end
     end
 
-    if (args.recursive? and follow) or not args.recursive?
+    if not missing.empty? and (follow or not args.recursive?)
       opoo "Missing citations for the following formulae:"
       missing.each do |name|
         puts "  #{name}"
