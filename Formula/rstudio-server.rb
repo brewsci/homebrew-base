@@ -1,8 +1,8 @@
 class RstudioServer < Formula
   desc "Integrated development environment (IDE) for R"
   homepage "https://www.rstudio.com"
-  url "https://github.com/rstudio/rstudio/archive/v1.2.1335.tar.gz"
-  sha256 "f124fbae68762d0a1fc9a7dc72ad290aebde768e262df87acda3883a07fdfd58"
+  url "https://github.com/rstudio/rstudio/archive/v1.2.5001.tar.gz"
+  sha256 "0d1ec7aef62bda1ceec364e372fdbbcc4da502a3f03eddcddc700bdead6ee840"
 
   bottle do
     root_url "https://linuxbrew.bintray.com/bottles-base"
@@ -11,14 +11,17 @@ class RstudioServer < Formula
   end
 
   if OS.linux?
-    if ENV["CIRCLECI"] || ENV["TRAVIS"]
-      depends_on "jdk@8" => :build
-    end
     depends_on "patchelf" => :build
     depends_on "libedit"
     depends_on "ncurses"
     depends_on "util-linux" # for libuuid
-    depends_on "linuxbrew/extra/linux-pam"
+    depends_on "linux-pam"
+  end
+
+  if ENV["CI"]
+    if OS.linux?
+      depends_on "adoptopenjdk" => :build
+    end
   end
 
   depends_on "ant" => :build
@@ -30,7 +33,6 @@ class RstudioServer < Formula
   depends_on "cmake" => :build
   depends_on "gcc" => :build
   depends_on :java => ["1.8", :build]
-  depends_on :macos if ENV["CIRCLECI"]
   depends_on "openssl"
   depends_on "r" => :recommended
 
@@ -80,15 +82,15 @@ class RstudioServer < Formula
     distritbuion
   end
 
-  # fix build failure with latest macOS compiler
-  patch do
-    url "https://github.com/rstudio/rstudio/commit/b3b1ef10ca8473b6cf02b22cdb57f871f0237a02.diff?full_index=1"
-    sha256 "37c58b7f31307db369ba8c5269f5c303838e06d5db44429766b0213ea6eb6c34"
-  end
-
   def install
-    # Reduce memory usage below 4 GB for CI.
-    ENV["MAKEFLAGS"] = "-j2" if ENV["CIRCLECI"] || ENV["TRAVIS"]
+    if ENV["CI"]
+      # Reduce memory usage below 4 GB for CI.
+      if OS.linux?
+        ENV["MAKEFLAGS"] = "-j2"
+      elsif OS.mac?
+        ENV["MAKEFLAGS"] = "-j4"
+      end
+    end
 
     unless build.head?
       ENV["RSTUDIO_VERSION_MAJOR"] = version.to_s.split(".")[0]
