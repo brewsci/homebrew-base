@@ -11,7 +11,7 @@ jobs:
     steps:
       - run: |
           cd /home/linuxbrew/.linuxbrew/Homebrew
-          if [ -e .git/shallow ]; then echo git fetch --unshallow; fi
+          if [ -e .git/shallow ]; then git fetch --unshallow; fi
           git fetch origin --tags
           git reset --hard origin/master
           cd /home/linuxbrew/.linuxbrew/Homebrew/Library/Taps/homebrew/homebrew-core
@@ -36,7 +36,6 @@ jobs:
             brew install patchelf
             brew tap linuxbrew/xorg
             brew test-bot --bintray-org=linuxbrew --root-url=https://linuxbrew.bintray.com/bottles-base --git-name=LinuxbrewTestBot --git-email=testbot@linuxbrew.sh
-            mv brew-test-bot.xml brew-test-bot-linux.xml
       - persist_to_workspace:
           root: /tmp
           paths:
@@ -45,7 +44,7 @@ jobs:
           path: /tmp/bottles
   build-macos:
     macos:
-      xcode: "9.0"
+      xcode: "10.2.0"
     environment:
       CIRCLE_REPOSITORY_URL: https://github.com/brewsci/homebrew-base
       HOMEBREW_DEVELOPER: 1
@@ -68,12 +67,11 @@ jobs:
           mkdir -p $repo
           cp -a ./ $repo/
       - run:
-          no_output_timeout: 30m
+          no_output_timeout: 60m
           command: |
             mkdir /tmp/bottles
             cd /tmp/bottles
             brew test-bot --skip-setup --bintray-org=linuxbrew --root-url=https://linuxbrew.bintray.com/bottles-base --git-name=LinuxbrewTestBot --git-email=testbot@linuxbrew.sh
-            mv brew-test-bot.xml brew-test-bot-macos.xml
       - persist_to_workspace:
           root: /tmp
           paths:
