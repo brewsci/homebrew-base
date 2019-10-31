@@ -7,7 +7,8 @@ class RstudioServer < Formula
   bottle do
     root_url "https://linuxbrew.bintray.com/bottles-base"
     cellar :any
-    sha256 "fab663bdbecef6933b53b94141e6fe99b07c9cb1e7bb160ea6046589dcaa4823" => :sierra
+    sha256 "255ef12e823fc4f2a3e4c3f673cda58cedbd70e15a002ea63d8921a1fb839a85" => :mojave
+    sha256 "6326a328ed08563c3ce10624b3a868b03a205bea1b7312baa13c321cbbb10d2a" => :x86_64_linux
   end
 
   if OS.linux?
