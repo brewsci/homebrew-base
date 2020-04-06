@@ -1,14 +1,6 @@
-#:  * `installv` [<options>] <formulae>
-#:
-#:    Install specified versions of formulae.
-#:
-#:    The syntax to specify a formula and version is
-#:      name=version_revision.rebuild
-#:    Version, revision, and rebuild are optional.
-#:    Version defaults to the current version unless specified.
-#:    Revision and rebuild default to 0 unless specified.
-#:    For example:
-#:      coreutils, coreutils=8.30, coreutils=8.30_2, coreutils=8.30_2.1
+# frozen_string_literal: true
+
+require "cli/parser"
 
 module Homebrew
   module_function
@@ -31,12 +23,34 @@ module Homebrew
     [name, "#{root_url}/#{bintray_filename(name, version, revision, rebuild)}"]
   end
 
-  def install_formulae
-    raise FormulaUnspecifiedError if ARGV.named.empty?
-    dry_run = ARGV.dry_run?
-    options = ARGV.options_only - ["-n", "--dry-run"]
+  def installv_args
+    Homebrew::CLI::Parser.new do
+      usage_banner <<~EOS
+        `installv` [<options>] <formulae>
+
+        Install specified versions of formulae.
+
+        The syntax to specify a formula and version is
+          name=version_revision.rebuild
+
+        Version, revision, and rebuild are optional.
+        Version defaults to the current version unless specified.
+        Revision and rebuild default to 0 unless specified.
+        For example:
+          coreutils, coreutils=8.30, coreutils=8.30_2, coreutils=8.30_2.1
+      EOS
+
+      switch "-n", "--dry-run", description: "Print the commands that would be executed"
+      min_named :formula
+    end
+  end
+
+  def installv
+    installv_args.parse
+    dry_run = args.dry_run?
+    options = args.options_only - ["-n", "--dry-run"]
     ENV["HOMEBREW_NO_INSTALL_CLEANUP"] = "1"
-    ARGV.named.each do |name_version|
+    args.named.each do |name_version|
       name, url = to_name_url name_version
       if dry_run
         puts [HOMEBREW_BREW_FILE, "install", *options, url].join(" ")
@@ -47,5 +61,3 @@ module Homebrew
     end
   end
 end
-
-Homebrew.install_formulae
