@@ -4,6 +4,13 @@ class ShinyServer < Formula
   url "https://github.com/rstudio/shiny-server/archive/v1.5.13.944.tar.gz"
   sha256 "938c45f60fe7f5e27bccd1a8e16c546c49d4800e3f4e2bbdbdf408c475abf379"
 
+  bottle do
+    root_url "https://linuxbrew.bintray.com/bottles-base"
+    cellar :any_skip_relocation
+    sha256 "5f24c1deec01163473edda4e460f93c4163bf175cc00d8ea60aba64017b465d4" => :catalina
+    sha256 "41865ca258b81467e9e24c3d6ddea7b3b7703d62b3d54d0c4a6a4e10c75f9118" => :x86_64_linux
+  end
+
   depends_on "cmake" => :build
   depends_on "node"
   depends_on "r" => :recommended
