@@ -1,5 +1,4 @@
-#:  * `cite` [`--bib`] [`--doi`] [`--ruby`] [`--text`] [`--url`] [`--recursive`] <formula_or_doi>...
-#:    Display citations of formulae and DOI.
+# frozen_string_literal: true
 
 require "cli/parser"
 
@@ -78,7 +77,7 @@ module Homebrew
     missing
   end
 
-  def cite(argument)
+  def cite_one(argument)
     case argument
     when %r{^https?://(dx\.)?doi\.org/}
       cite_url argument
@@ -89,19 +88,26 @@ module Homebrew
     end
   end
 
-  def cite_many
-    Homebrew::CLI::Parser.parse do
+  def cite_args
+    Homebrew::CLI::Parser.new do
+      usage_banner <<~EOS
+        `cite` [`--bib`] [`--doi`] [`--ruby`] [`--text`] [`--url`] [`--recursive`] <formula_or_doi>...
+
+        Display citations of formulae and DOI.
+      EOS
+
       switch "--bib"
       switch "--doi"
       switch "--recursive"
       switch "--ruby"
       switch "--text"
       switch "--url"
+      min_named :formula
     end
+  end
 
-    raise FormulaUnspecifiedError if ARGV.named.empty?
-    ARGV.named.each { |s| cite s }
+  def cite
+    cite_args.parse
+    args.named.each { |s| cite_one s }
   end
 end
-
-Homebrew.cite_many
