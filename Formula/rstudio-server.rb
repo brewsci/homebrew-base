@@ -1,8 +1,18 @@
 class RstudioServer < Formula
   desc "Integrated development environment (IDE) for R"
   homepage "https://www.rstudio.com"
-  url "https://github.com/rstudio/rstudio/archive/v1.2.5001.tar.gz"
-  sha256 "0d1ec7aef62bda1ceec364e372fdbbcc4da502a3f03eddcddc700bdead6ee840"
+  head "https://github.com/rstudio/rstudio.git"
+  stable do
+    url "https://github.com/rstudio/rstudio/archive/v1.3.959.tar.gz"
+    sha256 "5c89fe18e3d5ead0e7921c88e5fb42ed816823238e84135f5e9e3a364d35fcc1"
+    # upstream has the patch already but it is too big to be merged
+    patch :DATA
+    # For R 4.0, upstream has the patch already
+    patch :p1 do
+      url "https://github.com/rstudio/rstudio/commit/3fb2397.diff?full_index=1"
+      sha256 "4f7299400c584f6262a7ecdde718e9b72767e7aa4ba6762929d3ec3db773c6c7"
+    end
+  end
 
   bottle do
     root_url "https://linuxbrew.bintray.com/bottles-base"
@@ -19,12 +29,7 @@ class RstudioServer < Formula
     depends_on "linux-pam"
   end
 
-  if ENV["CI"]
-    if OS.linux?
-      depends_on "adoptopenjdk" => :build
-    end
-  end
-
+  depends_on "adoptopenjdk" => :build if ENV["CI"] && OS.linux?
   depends_on "ant" => :build
   if OS.linux?
     depends_on "boost-rstudio-server"
@@ -34,23 +39,8 @@ class RstudioServer < Formula
   depends_on "cmake" => :build
   depends_on "gcc" => :build
   depends_on :java => ["1.8", :build]
-  depends_on "openssl"
+  depends_on "openssl@1.1"
   depends_on "r" => :recommended
-
-  resource "gin" do
-    url "https://s3.amazonaws.com/rstudio-buildtools/gin-2.1.2.zip"
-    sha256 "b98e704164f54be596779696a3fcd11be5785c9907a99ec535ff6e9525ad5f9a"
-  end
-
-  resource "gwt" do
-    url "https://s3.amazonaws.com/rstudio-buildtools/gwt-2.8.1.zip"
-    sha256 "0b7af89fdadb4ec51cdb400ace94637d6fe9ffa401b168e2c3d372392a00a0a7"
-  end
-
-  resource "junit" do
-    url "https://s3.amazonaws.com/rstudio-buildtools/junit-4.9b3.jar"
-    sha256 "dc566c3f5da446defe36c534f7ee19cdfe7e565020038b2ef38f01bc9c070551"
-  end
 
   resource "dictionaries" do
     url "https://s3.amazonaws.com/rstudio-buildtools/dictionaries/core-dictionaries.zip"
@@ -58,29 +48,28 @@ class RstudioServer < Formula
   end
 
   resource "mathjax" do
-    url "https://s3.amazonaws.com/rstudio-buildtools/mathjax-26.zip"
-    sha256 "939a2d7f37e26287970be942df70f3e8f272bac2eb868ce1de18bb95d3c26c71"
+    url "https://s3.amazonaws.com/rstudio-buildtools/mathjax-27.zip"
+    sha256 "c56cbaa6c4ce03c1fcbaeb2b5ea3c312d2fb7626a360254770cbcb88fb204176"
   end
 
   if OS.linux?
     resource "pandoc" do
-      url "https://s3.amazonaws.com/rstudio-buildtools/pandoc/2.3.1/pandoc-2.3.1-linux.tar.gz"
-      sha256 "859609cdba5af61aefd7c93d174e412d6a38f5c1be90dfc357158638ff5e7059"
+      url "https://s3.amazonaws.com/rstudio-buildtools/pandoc/2.7.3/pandoc-2.7.3-linux.tar.gz"
+      sha256 "eb775fd42ec50329004d00f0c9b13076e707cdd44745517c8ce2581fb8abdb75"
     end
   elsif OS.mac?
     resource "pandoc" do
-      url "https://s3.amazonaws.com/rstudio-buildtools/pandoc/2.3.1/pandoc-2.3.1-macOS.zip"
-      sha256 "bc9ba6f1f4f447deff811554603edcdb13344b07b969151569b6e46e1c8c81b7"
+      url "https://s3.amazonaws.com/rstudio-buildtools/pandoc/2.7.3/pandoc-2.7.3-macOS.zip"
+      sha256 "fb93800c90f3fab05dbd418ee6180d086b619c9179b822ddfecb608874554ff0"
     end
   end
 
   def which_linux_distribution
     if File.exist?("/etc/redhat-release") || File.exist?("/etc/centos-release")
-      distritbuion = "rpm"
+      "rpm"
     else
-      distritbuion = "debian"
+      "debian"
     end
-    distritbuion
   end
 
   def install
@@ -103,19 +92,14 @@ class RstudioServer < Formula
     ENV["CFLAGS"] = ""
     ENV["CXXFLAGS"] = ""
 
-    gwt_lib = buildpath/"src/gwt/lib/"
-    (gwt_lib/"gin/2.1.2").install resource("gin")
-    (gwt_lib/"gwt/2.8.1").install resource("gwt")
-    gwt_lib.install resource("junit")
-
     common_dir = buildpath/"dependencies/common"
 
     (common_dir/"dictionaries").install resource("dictionaries")
-    (common_dir/"mathjax-26").install resource("mathjax")
+    (common_dir/"mathjax-27").install resource("mathjax")
 
     resource("pandoc").stage do
-      (common_dir/"pandoc/2.3.1/").install "bin/pandoc"
-      (common_dir/"pandoc/2.3.1/").install "bin/pandoc-citeproc"
+      (common_dir/"pandoc/2.7.3/").install "bin/pandoc"
+      (common_dir/"pandoc/2.7.3/").install "bin/pandoc-citeproc"
     end
 
     mkdir "build" do
@@ -125,6 +109,7 @@ class RstudioServer < Formula
       args << "-DBOOST_ROOT=#{Formula["boost-rstudio-server"].opt_prefix}"
       args << "-DCMAKE_INSTALL_PREFIX=#{prefix}/rstudio-server"
       args << "-DCMAKE_CXX_FLAGS=-I#{Formula["openssl"].opt_include}"
+      args << "-DRSTUDIO_CRASHPAD_ENABLED=0"
 
       linkerflags = "-DCMAKE_EXE_LINKER_FLAGS=-L#{Formula["openssl"].opt_lib}"
       if OS.linux?
@@ -153,20 +138,20 @@ class RstudioServer < Formula
   end
 
   def caveats
-    if OS.linux?
+    daemon = if OS.linux?
       if which_linux_distribution == "rpm"
-        daemon = <<-EOS
+        <<-EOS
 
         sudo cp #{opt_prefix}/extras/systemd/rstudio-server.redhat.service /etc/systemd/system/
         EOS
       else
-        daemon = <<-EOS
+        <<-EOS
 
         sudo cp #{opt_prefix}/extras/systemd/rstudio-server.service /etc/systemd/system/
         EOS
       end
     elsif OS.mac?
-      daemon = <<-EOS
+      <<-EOS
 
         If it is an upgrade or the plist file exists, unload the plist first
         sudo launchctl unload -w /Library/LaunchDaemons/com.rstudio.launchd.rserver.plist
@@ -178,7 +163,7 @@ class RstudioServer < Formula
 
     <<~EOS
       - To test run RStudio Server,
-          #{opt_bin}/rserver --server-daemonize=0
+          #{opt_bin}/rserver --server-daemonize=0 --server-data-dir=/tmp/rserver
 
       - To complete the installation of RStudio Server
           1. register RStudio daemon#{daemon}
@@ -199,3 +184,16 @@ class RstudioServer < Formula
     system "#{bin}/rstudio-server", "version"
   end
 end
+
+
+__END__
+diff --git a/src/cpp/CMakeLists.txt b/src/cpp/CMakeLists.txt
+index af791506eb..5845bdf1a0 100644
+--- a/src/cpp/CMakeLists.txt
++++ b/src/cpp/CMakeLists.txt
+@@ -317,0 +318 @@ endif()
++if (NOT DEFINED RSTUDIO_CRASHPAD_ENABLED OR RSTUDIO_CRASHPAD_ENABLED)
+@@ -338,0 +340 @@ endif()
++endif()
+@@ -527 +528,0 @@ endif()
+-
