@@ -4,37 +4,14 @@ class RstudioServer < Formula
   url "https://github.com/rstudio/rstudio/archive/v1.2.5001.tar.gz"
   sha256 "0d1ec7aef62bda1ceec364e372fdbbcc4da502a3f03eddcddc700bdead6ee840"
 
-  bottle do
-    root_url "https://linuxbrew.bintray.com/bottles-base"
-    cellar :any
-    sha256 "255ef12e823fc4f2a3e4c3f673cda58cedbd70e15a002ea63d8921a1fb839a85" => :mojave
-    sha256 "6326a328ed08563c3ce10624b3a868b03a205bea1b7312baa13c321cbbb10d2a" => :x86_64_linux
-  end
-
-  if OS.linux?
-    depends_on "patchelf" => :build
-    depends_on "libedit"
-    depends_on "ncurses"
-    depends_on "util-linux" # for libuuid
-    depends_on "linux-pam"
-  end
-
-  if ENV["CI"]
-    if OS.linux?
-      depends_on "adoptopenjdk" => :build
-    end
-  end
+  bottle: unneeded
 
   depends_on "ant" => :build
-  if OS.linux?
-    depends_on "boost-rstudio-server"
-  elsif OS.mac?
-    depends_on "boost-rstudio-server" => :build
-  end
+  depends_on "boost-rstudio-server"
   depends_on "cmake" => :build
-  depends_on "gcc" => :build
-  depends_on :java => ["1.8", :build]
-  depends_on "openssl"
+  depends_on "gcc@8" => :build
+  depends_on "openjdk@8"
+  depends_on "openssl@1.1"
   depends_on "r" => :recommended
 
   resource "gin" do
