@@ -6,26 +6,8 @@ class RstudioServer < Formula
 
   bottle: unneeded
 
-  if OS.linux?
-    depends_on "patchelf" => :build
-    depends_on "libedit"
-    depends_on "ncurses"
-    depends_on "util-linux" # for libuuid
-    depends_on "linux-pam"
-  end
-
-  if ENV["CI"]
-    if OS.linux?
-      depends_on "adoptopenjdk" => :build
-    end
-  end
-
   depends_on "ant" => :build
-  if OS.linux?
-    depends_on "boost-rstudio-server"
-  elsif OS.mac?
-    depends_on "boost-rstudio-server" => :build
-  end
+  depends_on "boost-rstudio-server"
   depends_on "cmake" => :build
   depends_on "gcc" => :build
   depends_on "openjdk@8"
