@@ -9,9 +9,9 @@ class RstudioServer < Formula
   depends_on "ant" => :build
   depends_on "boost-rstudio-server"
   depends_on "cmake" => :build
-  depends_on "gcc" => :build
+  depends_on "gcc@8" => :build
   depends_on "openjdk@8"
-  depends_on "openssl"
+  depends_on "openssl@1.1"
   depends_on "r" => :recommended
 
   resource "gin" do
