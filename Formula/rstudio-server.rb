@@ -4,12 +4,7 @@ class RstudioServer < Formula
   url "https://github.com/rstudio/rstudio/archive/v1.2.5001.tar.gz"
   sha256 "0d1ec7aef62bda1ceec364e372fdbbcc4da502a3f03eddcddc700bdead6ee840"
 
-  bottle do
-    root_url "https://linuxbrew.bintray.com/bottles-base"
-    cellar :any
-    sha256 "255ef12e823fc4f2a3e4c3f673cda58cedbd70e15a002ea63d8921a1fb839a85" => :mojave
-    sha256 "6326a328ed08563c3ce10624b3a868b03a205bea1b7312baa13c321cbbb10d2a" => :x86_64_linux
-  end
+  bottle: unneeded
 
   if OS.linux?
     depends_on "patchelf" => :build
@@ -33,7 +28,7 @@ class RstudioServer < Formula
   end
   depends_on "cmake" => :build
   depends_on "gcc" => :build
-  depends_on "openjdk@11"
+  depends_on "openjdk@8"
   depends_on "openssl"
   depends_on "r" => :recommended
 
