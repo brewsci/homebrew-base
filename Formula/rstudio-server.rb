@@ -6,9 +6,8 @@ class RstudioServer < Formula
 
   bottle do
     root_url "https://linuxbrew.bintray.com/bottles-base"
-    cellar :any
-    sha256 "255ef12e823fc4f2a3e4c3f673cda58cedbd70e15a002ea63d8921a1fb839a85" => :mojave
-    sha256 "6326a328ed08563c3ce10624b3a868b03a205bea1b7312baa13c321cbbb10d2a" => :x86_64_linux
+    sha256 cellar: :any, mojave:       "255ef12e823fc4f2a3e4c3f673cda58cedbd70e15a002ea63d8921a1fb839a85"
+    sha256 cellar: :any, x86_64_linux: "6326a328ed08563c3ce10624b3a868b03a205bea1b7312baa13c321cbbb10d2a"
   end
 
   if OS.linux?
@@ -70,11 +69,10 @@ class RstudioServer < Formula
 
   def which_linux_distribution
     if File.exist?("/etc/redhat-release") || File.exist?("/etc/centos-release")
-      distritbuion = "rpm"
+      "rpm"
     else
-      distritbuion = "debian"
+      "debian"
     end
-    distritbuion
   end
 
   def install
@@ -121,9 +119,7 @@ class RstudioServer < Formula
       args << "-DCMAKE_CXX_FLAGS=-I#{Formula["openssl"].opt_include}"
 
       linkerflags = "-DCMAKE_EXE_LINKER_FLAGS=-L#{Formula["openssl"].opt_lib}"
-      if OS.linux?
-        linkerflags += " -L#{Formula["linux-pam"].opt_lib}" if build.with? "linux-pam"
-      end
+      linkerflags += " -L#{Formula["linux-pam"].opt_lib}" if OS.linux? && (build.with? "linux-pam")
       args << linkerflags
 
       args << "-DPAM_INCLUDE_DIR=#{Formula["linux-pam"].opt_include}" if build.with? "linux-pam"
@@ -148,13 +144,13 @@ class RstudioServer < Formula
 
   def caveats
     if OS.linux?
-      if which_linux_distribution == "rpm"
-        daemon = <<-EOS
+      daemon = if which_linux_distribution == "rpm"
+        <<-EOS
 
         sudo cp #{opt_prefix}/extras/systemd/rstudio-server.redhat.service /etc/systemd/system/
         EOS
       else
-        daemon = <<-EOS
+        <<-EOS
 
         sudo cp #{opt_prefix}/extras/systemd/rstudio-server.service /etc/systemd/system/
         EOS

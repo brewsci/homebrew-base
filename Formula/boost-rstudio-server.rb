@@ -8,9 +8,8 @@ class BoostRstudioServer < Formula
 
   bottle do
     root_url "https://linuxbrew.bintray.com/bottles-base"
-    cellar :any_skip_relocation
-    sha256 "a6c23ff218b8d59b7ae4eb1640a703a74453cd604e723b7bedf75a957f98c006" => :sierra
-    sha256 "7a0b1493c1c28d4eefe193b45cc818fbf580162a98e123a1d09c735429974eb2" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, sierra:       "a6c23ff218b8d59b7ae4eb1640a703a74453cd604e723b7bedf75a957f98c006"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "7a0b1493c1c28d4eefe193b45cc818fbf580162a98e123a1d09c735429974eb2"
   end
 
   keg_only :versioned_formula
@@ -65,24 +64,22 @@ class BoostRstudioServer < Formula
             "-sNO_LZMA=1",
             "install"]
 
-    if build.with? "single"
-      args << "threading=multi,single"
+    args << if build.with? "single"
+      "threading=multi,single"
     else
-      args << "threading=multi"
+      "threading=multi"
     end
 
-    if build.with? "static"
-      args << "link=shared,static"
+    args << if build.with? "static"
+      "link=shared,static"
     else
-      args << "link=shared"
+      "link=shared"
     end
 
     # Trunk starts using "clang++ -x c" to select C compiler which breaks C++11
     # handling using ENV.cxx11. Using "cxxflags" and "linkflags" still works.
     args << "cxxflags=-std=c++11"
-    if ENV.compiler == :clang
-      args << "cxxflags=-stdlib=libc++" << "linkflags=-stdlib=libc++"
-    end
+    args << "cxxflags=-stdlib=libc++" << "linkflags=-stdlib=libc++" if ENV.compiler == :clang
 
     # Fix error: bzlib.h: No such file or directory
     # and /usr/bin/ld: cannot find -lbz2

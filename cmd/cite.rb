@@ -6,7 +6,8 @@ module Homebrew
   module_function
 
   def doi_url_to_other(url, format)
-    return nil unless url.include? "doi.org/"
+    return unless url.include? "doi.org/"
+
     Utils.popen_read("curl", "-LH", "Accept: #{format}", url).strip.gsub(/\n */, " ")
   end
 
@@ -23,7 +24,7 @@ module Homebrew
       bib = doi_url_to_bib url
       if bib
         key = bib[/{([^,]+),/, 1]
-        puts %Q{# cite #{key}: "#{url}"}
+        puts %Q(# cite #{key}: "#{url}")
       else
         opoo "No DOI for #{url}"
       end
@@ -52,7 +53,7 @@ module Homebrew
 
   def cite_formula(name, follow = true)
     formula = Formula[name]
-    matches = formula.path.read.scan /# cite .*"(.*)"/
+    matches = formula.path.read.scan(/# cite .*"(.*)"/)
     missing = []
 
     if matches.empty?
@@ -61,13 +62,13 @@ module Homebrew
       matches.each { |match| cite_url match[0] }
     end
 
-    if args.recursive? and follow
+    if args.recursive? && follow
       formula.deps.each do |dep|
         missing += cite_formula(dep.name, false)
       end
     end
 
-    if not missing.empty? and (follow or not args.recursive?)
+    if !missing.empty? && (follow || !args.recursive?)
       opoo "Missing citations for the following formulae:"
       missing.each do |name|
         puts "  #{name}"
