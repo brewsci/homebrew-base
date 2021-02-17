@@ -5,7 +5,7 @@ class ShinyServer < Formula
   sha256 "938c45f60fe7f5e27bccd1a8e16c546c49d4800e3f4e2bbdbdf408c475abf379"
 
   bottle do
-    root_url "https://linuxbrew.bintray.com/bottles-base"
+    root_url "https://archive.org/download/brewsci/bottles-base"
     sha256 cellar: :any_skip_relocation, catalina:     "5f24c1deec01163473edda4e460f93c4163bf175cc00d8ea60aba64017b465d4"
     sha256 cellar: :any_skip_relocation, x86_64_linux: "41865ca258b81467e9e24c3d6ddea7b3b7703d62b3d54d0c4a6a4e10c75f9118"
   end
