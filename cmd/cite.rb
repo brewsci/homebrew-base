@@ -19,7 +19,7 @@ module Homebrew
     doi_url_to_other(url, "text/plain")
   end
 
-  def cite_url(url)
+  def cite_url(args, url)
     if args.ruby?
       bib = doi_url_to_bib url
       if bib
@@ -41,17 +41,18 @@ module Homebrew
       text = doi_url_to_text url
       puts text if text
     end
-    if args.bib? || default
-      bib = doi_url_to_bib url
-      puts bib if bib
-    end
+
+    return if !args.bib? && !default
+
+    bib = doi_url_to_bib url
+    puts bib if bib
   end
 
-  def cite_doi(doi)
-    cite_url "https://doi.org/#{doi}"
+  def cite_doi(args, doi)
+    cite_url args, "https://doi.org/#{doi}"
   end
 
-  def cite_formula(name, follow = true)
+  def cite_formula(args, name, follow: true)
     formula = Formula[name]
     matches = formula.path.read.scan(/# cite .*"(.*)"/)
     missing = []
@@ -59,33 +60,33 @@ module Homebrew
     if matches.empty?
       missing << formula.full_name
     else
-      matches.each { |match| cite_url match[0] }
+      matches.each { |match| cite_url args, match[0] }
     end
 
     if args.recursive? && follow
       formula.deps.each do |dep|
-        missing += cite_formula(dep.name, false)
+        missing += cite_formula(args, dep.name, follow: false)
       end
     end
 
     if !missing.empty? && (follow || !args.recursive?)
       opoo "Missing citations for the following formulae:"
-      missing.each do |name|
-        puts "  #{name}"
+      missing.each do |missing_name|
+        puts "  #{missing_name}"
       end
     end
 
     missing
   end
 
-  def cite_one(argument)
+  def cite_one(args, argument)
     case argument
     when %r{^https?://(dx\.)?doi\.org/}
-      cite_url argument
+      cite_url args, argument
     when /^10\./
-      cite_doi argument
+      cite_doi args, argument
     else
-      cite_formula argument
+      cite_formula args, argument
     end
   end
 
@@ -103,12 +104,12 @@ module Homebrew
       switch "--ruby"
       switch "--text"
       switch "--url"
-      min_named :formula
+      named_args :formula, min: 1
     end
   end
 
   def cite
-    cite_args.parse
-    args.named.each { |s| cite_one s }
+    args = cite_args.parse
+    args.named.each { |s| cite_one args, s }
   end
 end
