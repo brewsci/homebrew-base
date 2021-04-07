@@ -7,7 +7,7 @@ class BoostRstudioServer < Formula
   head "https://github.com/boostorg/boost.git"
 
   bottle do
-    root_url "https://archive.org/download/brewsci/bottles-base"
+    root_url "https://ghcr.io/v2/brewsci/base"
     sha256 cellar: :any_skip_relocation, sierra:       "a6c23ff218b8d59b7ae4eb1640a703a74453cd604e723b7bedf75a957f98c006"
     sha256 cellar: :any_skip_relocation, x86_64_linux: "7a0b1493c1c28d4eefe193b45cc818fbf580162a98e123a1d09c735429974eb2"
   end

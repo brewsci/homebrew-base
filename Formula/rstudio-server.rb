@@ -5,7 +5,7 @@ class RstudioServer < Formula
   sha256 "0d1ec7aef62bda1ceec364e372fdbbcc4da502a3f03eddcddc700bdead6ee840"
 
   bottle do
-    root_url "https://archive.org/download/brewsci/bottles-base"
+    root_url "https://ghcr.io/v2/brewsci/base"
     sha256 cellar: :any, mojave:       "255ef12e823fc4f2a3e4c3f673cda58cedbd70e15a002ea63d8921a1fb839a85"
     sha256 cellar: :any, x86_64_linux: "6326a328ed08563c3ce10624b3a868b03a205bea1b7312baa13c321cbbb10d2a"
   end
